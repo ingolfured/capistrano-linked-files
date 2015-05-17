@@ -20,10 +20,12 @@ namespace :linked_files do
           remote_path = "#{shared_path}/#{local_path}"
           remote_md5 = capture "md5sum #{remote_path} | awk '{print $1}'"
           local_md5 = `md5sum #{local_path} | awk '{print $1}'`
+          remote_md5.strip!
+          local_md5.strip!
           puts "Local md5: " + local_md5
           puts "Remote md5: " + remote_md5
           puts "Are they the same? " + (local_md5 == remote_md5).to_s
-          if local_md5.strip != remote_md5.strip
+          if local_md5 != remote_md5
             upload! local_path, "#{shared_path}/#{local_path}"
           end
         end
