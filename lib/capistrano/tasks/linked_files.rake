@@ -16,8 +16,13 @@ namespace :linked_files do
 
     task :files do
       on roles :web do
-        fetch(:linked_files).each do |file|
-          upload! file, "#{shared_path}/#{file}"
+        fetch(:linked_files).each do |local_path|
+          remote_path = "#{shared_path}/#{local_path}"
+          remote_md5 = capture "md5sum #{remote_path} | awk '{print $NF}'"
+          local_md5 = `md5sum #{local_path} | awk '{print $NF}'`
+          if local_md5 != remote_md5
+            upload! local_path, "#{shared_path}/#{local_path}"
+          end
         end
       end
     end
