@@ -19,9 +19,11 @@ namespace :linked_files do
         fetch(:linked_files).each do |local_path|
           remote_path = "#{shared_path}/#{local_path}"
           remote_md5 = capture "md5sum #{remote_path} | awk '{print $1}'"
-          local_md5 = `md5sum #{local_path} | awk '{print $1}'`
           remote_md5.strip!
-          local_md5.strip!
+
+          local_file = File.read(local_path)
+          local_md5 = Digest::MD5.hexdigest(local_file)
+
           puts "Local md5: " + local_md5
           puts "Remote md5: " + remote_md5
           puts "Are they the same? " + (local_md5 == remote_md5).to_s
@@ -35,7 +37,9 @@ namespace :linked_files do
     task :dirs do
       on roles :web do
         fetch(:linked_dirs).each do |dir|
-          upload! dir, "#{shared_path}/", recursive: true
+          if (/log/ =~ dir) == nil
+            upload! dir, "#{shared_path}/", recursive: true
+          end
         end
       end
     end
